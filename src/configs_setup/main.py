@@ -49,14 +49,19 @@ class WireGuardServer:
         self.server_config = self._server_config_text()
 
     def _gen_server_keys(self):
+        # command = f"cd \"{self.path}\"; .\\wg.exe genkey | " \
+        #           f"Tee-Object \"server_keys\\{self.name + '_private.key'}\""
+        # private = self._execute_command(command).stdout
+        # print("private:", private)
+        # command = f"cd \"{self.path}\"; echo \"{private}\" | .\\wg pubkey | " \
+        #           f"Tee-Object \"server_keys\\{self.name + '_public.key'}\";"
+        # public = self._execute_command(command).stdout
+        # print("public:", public)
         command = f"cd \"{self.path}\"; .\\wg.exe genkey | " \
-                  f"Tee-Object \"server_keys\\{self.name + '_private.key'}\""
-        private = self._execute_command(command).stdout
-        print("private:", private)
-        command = f"cd \"{self.path}\"; echo \"{private}\" | .\\wg pubkey | " \
-                  f"Tee-Object \"server_keys\\{self.name + '_public.key'}\";"
-        public = self._execute_command(command).stdout
-        print("public:", public)
+                  f"Tee-Object \"server_keys\\{self.name + '_private.key'}\" | " \
+                  f".\\wg.exe pubkey | " \
+                  f"Tee-Object \"server_keys\\{self.name + '_public.key'}\""
+        print(self._execute_command(command).stderr)
 
     def _get_keys(self, client_id=None):
         if client_id is None:
