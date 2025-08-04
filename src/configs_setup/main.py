@@ -51,7 +51,7 @@ class WireGuardServer:
     def _gen_server_keys(self):
         command = f"cd \"{self.path}\"; .\\wg.exe genkey | " \
                   f"Tee-Object \"server_keys\\{self.name + '_private.key'}\""
-        private = self._execute_command(command).stdout.split()[0]
+        private = self._execute_command(command).stdout.split()[0][1:]
         print("private:", private)
         command = f"cd \"{self.path}\"; echo \"{private}\" | .\\wg pubkey | " \
                   f"Tee-Object \"server_keys\\{self.name + '_public.key'}\";"
