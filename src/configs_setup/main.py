@@ -50,10 +50,13 @@ class WireGuardServer:
 
     def _gen_server_keys(self):
         command = f"cd \"{self.path}\"; .\\wg.exe genkey | " \
-                  f"Tee-Object \"server_keys\\{self.name + '_private.key'}\"| " \
-                  f".\\wg.exe pubkey | " \
-                  f"Tee-Object \"server_keys\\{self.name + '_public.key'}\""
-        self._execute_command(command)
+                  f"Tee-Object \"server_keys\\{self.name + '_private.key'}\""
+        private = self._execute_command(command).stdout
+        print("private:", private)
+        command = f"cd \"{self.path}\"; echo \"{private}\" | .\\wg pubkey | " \
+                  f"Tee-Object \"server_keys\\{self.name + '_public.key'}\";"
+        public = self._execute_command(command).stdout
+        print("public:", public)
 
     def _get_keys(self, client_id=None):
         if client_id is None:
@@ -86,9 +89,13 @@ ListenPort = {self.port}
 
     def _create_client(self, current_client: int):
         command = f"cd \"{self.path}\"; .\\wg.exe genkey | " \
-                  f"Tee-Object -FilePath \"clients_keys/{self.name}/client{current_client}_private.key\" | " \
-                  f".\\wg.exe pubkey | " \
-                  f"Tee-Object -FilePath \"clients_keys/{self.name}/client{current_client}_public.key\""
+                  f"Tee-Object \"clients_keys/{self.name}/client{current_client}_private.key\""
+        private = self._execute_command(command).stdout
+        print("private:", private)
+        command = f"cd \"{self.path}\"; echo \"{private}\" | .\\wg pubkey | " \
+                  f"Tee-Object \"clients_keys/{self.name}/client{current_client}_public.key\";"
+        public = self._execute_command(command).stdout
+        print("public:", public)
         self._execute_command(command)
         self.current_client_public, self.current_client_private = self._get_keys(client_id=current_client)
         self.current_client_ip = self._client_ip(current_client)
